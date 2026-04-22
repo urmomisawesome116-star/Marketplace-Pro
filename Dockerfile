@@ -1,19 +1,20 @@
-# Use an official Node.js runtime as the base image
-FROM node:20-slim
+# 1. Use the official image for your language
+FROM python:3.11-slim
 
-# Set the working directory
-WORKDIR /usr/src/app
+# 2. Set the working directory
+WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install --only=production
+# 3. Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# 4. Copy your local code to the container
 COPY . .
 
-# Cloud Run sets the PORT environment variable. Your app must listen on it.
+# 5. EXACT REQUIREMENT: Listen on port 8080
 ENV PORT 8080
+EXPOSE 8080
 
-# Start the application
-CMD [ "npm", "start" ]
+# 6. Run your app (example for Flask/Gunicorn)
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
 
