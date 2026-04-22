@@ -1,15 +1,19 @@
-# Use an official lightweight Python image
-FROM python:3.9-slim
+# Use an official Node.js runtime as the base image
+FROM node:20-slim
 
-# Set working directory
-WORKDIR /app
+# Set the working directory
+WORKDIR /usr/src/app
 
-# Copy and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install --only=production
 
-# Copy application code
+# Copy the rest of the application code
 COPY . .
 
-# Cloud Run injects a PORT env var; the app must listen on it
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
+# Cloud Run sets the PORT environment variable. Your app must listen on it.
+ENV PORT 8080
+
+# Start the application
+CMD [ "npm", "start" ]
+
